@@ -1,0 +1,358 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 180.0
+#  >methods=25
+#  >complexity=20
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/toto/App.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/toto/App.java
+   - dir: target/classes
+     file: com/epam/training/toto/domain/Hit.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/toto/domain/Hit.java
+   - dir: target/classes
+     file: com/epam/training/toto/domain/Round.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/toto/domain/Round.java
+   - dir: target/classes
+     file: com/epam/training/toto/domain/Outcome.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/toto/domain/Outcome.java
+# Target TGF: 1320.75
+#  >methods=7
+#  >complexity=314
+#  >construction=20.25
+#  >dependency=6.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/Prints.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/Prints.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Outcome.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Outcome.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Player.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Player.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Wager.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Wager.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/SportEvent.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/SportEvent.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Bet.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Bet.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/OutcomeOdd.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/OutcomeOdd.java
+# Target TGF: 22.0
+#  >methods=7
+#  >complexity=22
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/SportEvent.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/SportEvent.java
+# Target TGF: 28.0
+#  >methods=9
+#  >complexity=28
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/toto/domain/Hit.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/toto/domain/Hit.java
+# Target TGF: 42.0
+#  >methods=13
+#  >complexity=42
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Player.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Player.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/User.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/User.java
+# Target TGF: 60.0
+#  >methods=14
+#  >complexity=60
+#  >construction=3.0
+#  >dependency=3.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/toto/domain/Round.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/toto/domain/Round.java
+# Target TGF: 149.0625
+#  >methods=4
+#  >complexity=210
+#  >construction=4.5
+#  >dependency=0.75
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/PlayerSetting.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/PlayerSetting.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Player.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Player.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/builder/PlayerBuilder.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/builder/PlayerBuilder.java
+# Target TGF: 15.1428571429
+#  >methods=9
+#  >complexity=64
+#  >construction=1.89285714286
+#  >dependency=8.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/builder/PlayerBuilder.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/builder/PlayerBuilder.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Player.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Player.java
+# Target TGF: 176.333333333
+#  >methods=14
+#  >complexity=130
+#  >construction=11.25
+#  >dependency=2.83333333333
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/App.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/App.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Outcome.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Outcome.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/service/SportsBettingService.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/service/SportsBettingService.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Result.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Result.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/FootballSportEvent.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/FootballSportEvent.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/ui/IO.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/ui/IO.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Player.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Player.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/SportEvent.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/SportEvent.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/PlayerSetting.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/PlayerSetting.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Wager.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Wager.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/Prints.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/Prints.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Bet.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Bet.java
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/OutcomeOdd.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/OutcomeOdd.java
+# Target TGF: 16.2857142857
+#  >methods=7
+#  >complexity=30
+#  >construction=1.14285714286
+#  >dependency=2.0
+ - target:
+   - dir: target/classes
+     file: com/epam/training/sportsbetting/domain/Bet.class
+     sourceDir: src/main/java
+     sourceFile: com/epam/training/sportsbetting/domain/Bet.java
